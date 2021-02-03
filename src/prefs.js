@@ -20,7 +20,7 @@ function getSettings() {
         false
     );
     let schemaObj = schemaSource.lookup(
-        'com.ftpix.transparentbar', true);
+        'net.evendanan.gnome.topBarVisual', true);
     if (!schemaObj) {
         throw new Error('cannot find schemas');
     }
@@ -41,25 +41,45 @@ const MyPrefsWidget = GObject.registerClass(
 
             this.connect('destroy', Gtk.main_quit);
 
-            let myLabel = new Gtk.Label({
+            const _this = this;
+            
+            //transparent prefs
+            let transparentBox = new Gtk.Box();
+            transparentBox.set_orientation(Gtk.Orientation.VERTICAL);
+
+            let transparentLabel = new Gtk.Label({
                 label: "Top bar transparency (%)"
             });
+            transparentBox.pack_start(transparentLabel, false, false, 0);
+            
+            let transparentScale = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, 0.0, 100.0, 1.0);
+            transparentScale.set_value(this.settings.get_int("transparency"));
 
-            let scale = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, 0.0, 100.0, 1.0);
-            scale.set_value(this.settings.get_int("transparency"));
-
-            const _this = this;
-            scale.connect("value-changed", function (w) {
+            transparentScale.connect("value-changed", function (w) {
                 _this.settings.set_int("transparency", w.get_value());
             });
+            transparentBox.pack_end(transparentScale, false, false, 0);
 
-            let box = new Gtk.Box();
-            box.set_orientation(Gtk.Orientation.VERTICAL);
+            this.add(transparentBox);
 
-            box.pack_start(myLabel, false, false, 0);
-            box.pack_end(scale, false, false, 0);
+            //blur prefs
+            let blurBox = new Gtk.Box();
+            blurBox.set_orientation(Gtk.Orientation.VERTICAL);
 
-            this.add(box);
+            let blurLabel = new Gtk.Label({
+                label: "Top bar blurring (%)"
+            });
+            blurBox.pack_start(blurLabel, false, false, 0);
+            
+            let blurScale = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, 0.0, 100.0, 1.0);
+            blurScale.set_value(this.settings.get_int("blur"));
+
+            blurScale.connect("value-changed", function (w) {
+                _this.settings.set_int("blur", w.get_value());
+            });
+            blurBox.pack_end(blurScale, false, false, 0);
+
+            this.add(blurBox);
         }
 
     });

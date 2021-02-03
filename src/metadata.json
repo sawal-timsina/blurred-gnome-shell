@@ -1,10 +1,10 @@
 {
-  "description": "Fork of: https://github.com/zhanghai/gnome-shell-extension-transparent-top-bar\n\nBring back the transparent top bar when free-floating in GNOME Shell with adjustable transparency.\n\nDoes not work well with custom shell themes.",
-  "name": "Transparent Top Bar (Adjustable transparency)",
+  "description": "Fork of: https://github.com/lamarios/gnome-shell-extension-transparent-top-bar\n\nBring back the adjustable transparency top bar in GNOME Shell and add blur while at it.\n\nDoes not work well with custom shell themes.",
+  "name": "Top Bar Visuals - transparent and blur",
   "shell-version": [
     "3.38"
   ],
-  "url": "https://github.com/lamarios/gnome-shell-extension-transparent-top-bar",
-  "uuid": "transparent-top-bar@ftpix.com",
-  "version": 1.1
+  "url": "https://github.com/menny/gnome-shell-extension-transparent-top-bar",
+  "uuid": "gnome-visuals-top-bar@evendanan.net",
+  "version": 1.0
 }

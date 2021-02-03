@@ -1,10 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schemalist>
-    <schema id="com.ftpix.transparentbar" path="/com/ftpix/transparentbar/">
+    <schema id="net.evendanan.gnome.topBarVisual" path="/net/evendanan/gnome/topBarVisual/">
         <key type="i" name="transparency">
             <default>35</default>
             <summary>Top bar transparency</summary>
             <description>Top bar transparency</description>
+        </key>
+        <key type="i" name="blur">
+            <default>50</default>
+            <summary>Top bar blurring</summary>
+            <description>Top bar blurring</description>
         </key>
     </schema>
 </schemalist>
