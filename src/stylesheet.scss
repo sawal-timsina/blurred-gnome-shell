@@ -18,11 +18,15 @@
   }
 
   #panel.transparent-top-bar--blur-#{$i} {
+    backdrop-filter: blur($blur);
     filter: blur($blur);
+    -webkit-filter: blur($blur);
   }
 
   #panel.transparent-top-bar--blur-#{$i} .panel-corner {
+    backdrop-filter: blur($blur);
     filter: blur($blur);
+    -webkit-filter: blur($blur);
   }
 
 }
@@ -37,7 +41,7 @@
 #panel.transparent-top-bar--not-solid .system-status-icon,
 #panel.transparent-top-bar--not-solid .app-menu-icon > StIcon,
 #panel.transparent-top-bar--not-solid .popup-menu-arrow {
-  icon-shadow: 0px 1px 2px rgba(0, 0, 0, 0.9);
+  icon-shadow: 0px 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 #panel.transparent-top-bar--not-solid:hover {

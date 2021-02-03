@@ -62,6 +62,25 @@ const MyPrefsWidget = GObject.registerClass(
 
             this.add(transparentBox);
 
+            //transparent-on-full-screen prefs
+            let transparentBoxFull = new Gtk.Box();
+            transparentBoxFull.set_orientation(Gtk.Orientation.VERTICAL);
+
+            let transparentFullLabel = new Gtk.Label({
+                label: "Top bar transparency when full screen (%)"
+            });
+            transparentBoxFull.pack_start(transparentFullLabel, false, false, 0);
+            
+            let transparentFullScale = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, 0.0, 100.0, 1.0);
+            transparentFullScale.set_value(this.settings.get_int("transparency-full"));
+
+            transparentFullScale.connect("value-changed", function (w) {
+                _this.settings.set_int("transparency-full", w.get_value());
+            });
+            transparentBoxFull.pack_end(transparentFullScale, false, false, 0);
+
+            this.add(transparentBoxFull);
+
             //blur prefs
             let blurBox = new Gtk.Box();
             blurBox.set_orientation(Gtk.Orientation.VERTICAL);

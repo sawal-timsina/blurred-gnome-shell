@@ -31,3 +31,7 @@ make
 ```
 This will result in a zip file at `build/gnome-visuals-top-bar@evendanan.net.zip`
 
+### Copy built extension to gnome
+```
+make install
+```
