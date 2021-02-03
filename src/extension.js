@@ -49,7 +49,7 @@ class Extension {
         this._actorSignalIds = new Map();
         this._windowSignalIds = new Map();
 
-        this._settings.connect('changed', this.topBarVisualSettingsChanged.bind(this));
+        this._settings.connect('changed', this._topBarVisualSettingsChanged.bind(this));
         this._actorSignalIds.set(Main.overview, [
             Main.overview.connect('showing', this._updateTopBarVisual.bind(this)),
             Main.overview.connect('hiding', this._updateTopBarVisual.bind(this))
@@ -75,26 +75,11 @@ class Extension {
         this._updateTopBarVisual();
     }
 
-    topBarVisualSettingsChanged(settings, key) {
-        if (key === 'transparency') {
-            clearTimeout(this.settingChangeDebounce);
-            this.settingChangeDebounce = setTimeout(() => {
-                Main.panel.remove_style_class_name('transparent-top-bar--transparent-' + this._currentTransparency);
-                this._updateTopBarVisual();
-            }, 500);
-        } else if (key === 'transparency-full') {
-            clearTimeout(this.settingChangeDebounce);
-            this.settingChangeDebounce = setTimeout(() => {
-                Main.panel.remove_style_class_name('transparent-top-bar--transparent-' + this._currentTransparency);
-                this._updateTopBarVisual();
-            }, 500);
-        } else if (key === 'blur') {
-            clearTimeout(this.settingChangeDebounce);
-            this.settingChangeDebounce = setTimeout(() => {
-                Main.panel.remove_style_class_name('transparent-top-bar--blur-' + this._currentBlur);
-                this._updateTopBarVisual();
-            }, 500);
-        }
+    _topBarVisualSettingsChanged(settings, key) {
+        clearTimeout(this.settingChangeDebounce);
+        this.settingChangeDebounce = setTimeout(() => {
+            this._updateTopBarVisual();
+        }, 125);
     }
 
     disable() {
@@ -127,7 +112,6 @@ class Extension {
     }
 
     _updateTopBarVisual() {
-        global.log("_updateTopBarVisual called.");
         if (!Main.layoutManager.primaryMonitor) {
             return;
         }
@@ -136,9 +120,6 @@ class Extension {
     }
 
     _setTopBarVisual(enabled) {
-        Main.panel.remove_style_class_name('transparent-top-bar--transparent-' + this._currentTransparency);
-        Main.panel.remove_style_class_name('transparent-top-bar--blur-' + this._currentBlur);
-
         if (enabled) {
             //need to determine which transparency to use: full-window or regular
 
@@ -162,21 +143,29 @@ class Extension {
             });
             
             const transparency = isNearEnough? this._settings.get_int("transparency-full") : this._settings.get_int("transparency");
+            const transparencyChanged = transparency !== this._currentTransparency;
             const blur = this._settings.get_int("blur");
+            const blurChanged = blur !== this._currentBlur;
             
 
-            global.log("_setTopBarVisual: isNearEnough: "+isNearEnough+", transparency: "+transparency+", blur: "+blur);
             Main.panel.remove_style_class_name('transparent-top-bar--solid');
             Main.panel.add_style_class_name('transparent-top-bar--not-solid');
+            if (transparencyChanged) {
+                Main.panel.remove_style_class_name('transparent-top-bar--transparent-' + this._currentTransparency);
+            }
             Main.panel.add_style_class_name('transparent-top-bar--transparent-' + transparency);
+            if (blurChanged) {
+                Main.panel.remove_style_class_name('transparent-top-bar--blur-' + this._currentBlur);
+            }
             Main.panel.add_style_class_name('transparent-top-bar--blur-' + blur);
 
             this._currentTransparency = transparency;
             this._currentBlur = blur;
         } else {
-            global.log("_setTopBarVisual disabled");
             Main.panel.add_style_class_name('transparent-top-bar--solid');
             Main.panel.remove_style_class_name('transparent-top-bar--not-solid');
+            Main.panel.remove_style_class_name('transparent-top-bar--transparent-' + this._currentTransparency);
+            Main.panel.remove_style_class_name('transparent-top-bar--blur-' + this._currentBlur);
         }
     }
 

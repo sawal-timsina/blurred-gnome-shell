@@ -2,12 +2,12 @@
 <schemalist>
     <schema id="net.evendanan.gnome.topBarVisual" path="/net/evendanan/gnome/topBarVisual/">
         <key type="i" name="transparency">
-            <default>25</default>
+            <default>30</default>
             <summary>Top bar transparency</summary>
             <description>Top bar transparency</description>
         </key>
         <key type="i" name="transparency-full">
-            <default>80</default>
+            <default>70</default>
             <summary>Top bar transparency when full screen</summary>
             <description>Top bar transparency when at least one window is close to the top-bar</description>
         </key>
