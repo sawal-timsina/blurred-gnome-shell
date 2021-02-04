@@ -61,7 +61,7 @@ class Extension {
         ]);
 
         this._actorSignalIds.set(Main.sessionMode, [
-            Main.sessionMode.connect('updated', this._updateTopBarVisual.bind(this))
+            Main.sessionMode.connect('updated', this._postUpdateTopBarVisualSettings.bind(this))
         ]);
 
         for (const metaWindowActor of global.get_window_actors()) {
@@ -81,6 +81,10 @@ class Extension {
     }
 
     _topBarVisualSettingsChanged(settings, key) {
+       this._postUpdateTopBarVisualSettings();
+    }
+
+    _postUpdateTopBarVisualSettings() {
         clearTimeout(this.settingChangeDebounce);
         this.settingChangeDebounce = setTimeout(() => {
             this._updateTopBarVisual();
@@ -103,8 +107,8 @@ class Extension {
 
     _onWindowActorAdded(container, metaWindowActor) {
         this._windowSignalIds.set(metaWindowActor, [
-            metaWindowActor.connect('notify::allocation', this._updateTopBarVisual.bind(this)),
-            metaWindowActor.connect('notify::visible', this._updateTopBarVisual.bind(this))
+            metaWindowActor.connect('notify::allocation', this._postUpdateTopBarVisualSettings.bind(this)),
+            metaWindowActor.connect('notify::visible', this._postUpdateTopBarVisualSettings.bind(this))
         ]);
     }
 
@@ -149,21 +153,16 @@ class Extension {
             
             const transparency = isNearEnough? this._settings.get_int("transparency-full") : this._settings.get_int("transparency");
             const transparencyChanged = transparency !== this._currentTransparency;
-            const blur = this._settings.get_int("blur");
-            const blurChanged = blur !== this._currentBlur;
-            
-
             Main.panel.remove_style_class_name('transparent-top-bar--solid');
             Main.panel.add_style_class_name('transparent-top-bar--not-solid');
             if (transparencyChanged) {
                 Main.panel.remove_style_class_name('transparent-top-bar--transparent-' + this._currentTransparency);
             }
-            
             log("transparent is: "+transparency);
             Main.panel.add_style_class_name('transparent-top-bar--transparent-' + transparency);
-            if (blurChanged) {
-                this._removeBlurredActors(Main.layoutManager.panelBox, PANEL_CONTAINER_NAME);
-            }
+
+            const blur = this._settings.get_int("blur");
+            this._removeBlurredActors(Main.layoutManager.panelBox, PANEL_CONTAINER_NAME);
             this._createBlurredPanelActor(100, blur);
 
             this._currentTransparency = transparency;
