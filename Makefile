@@ -12,3 +12,5 @@ clean:
 install:
 	gnome-extensions install -f build/$(OUTOUT_NAME).zip
 	gnome-extensions enable $(OUTOUT_NAME)
+refresh: clean build install
+	dbus-run-session -- env MUTTER_DEBUG_NUM_DUMMY_MONITORS=1 MUTTER_DEBUG_DUMMY_MONITOR_SCALES=2 MUTTER_DEBUG_DUMMY_MODE_SPECS=2560x1440 gnome-shell --nested --wayland
