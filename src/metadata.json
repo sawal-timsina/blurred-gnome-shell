@@ -1,5 +1,5 @@
 {
-  "description": "Fork of: https://github.com/lamarios/gnome-shell-extension-transparent-top-bar\n\nBring back the adjustable transparency top bar in GNOME Shell and add blur while at it.\n\nDoes not work well with custom shell themes.",
+  "description": "Fork of: https://github.com/lamarios/gnome-shell-extension-transparent-top-bar\n\nBring back the adjustable transparency top bar (panel) in GNOME Shell and add blur while at it.\n\nDoes not work well with custom shell themes.",
   "name": "Top Bar Visuals - transparent and blur",
   "shell-version": [
     "3.38"

@@ -1,9 +1,14 @@
-const {Meta, St} = imports.gi;
-
 const Main = imports.ui.main;
 const Me = imports.misc.extensionUtils.getCurrentExtension();
+const Meta = imports.gi.Meta;
+const St = imports.gi.St;
 const Gio = imports.gi.Gio;
 const GLib = imports.gi.GLib;
+const Shell = imports.gi.Shell;
+const Clutter = imports.gi.Clutter;
+
+const SHELL_BLUR_MODE_ACTOR = 0;
+const PANEL_CONTAINER_NAME = 'net.evendanan.gnome.topBarVisual_panel_container';
 
 /**
  * https://developer.mozilla.org/docs/Web/API/WindowOrWorkerGlobalScope/setTimeout
@@ -153,22 +158,129 @@ class Extension {
             if (transparencyChanged) {
                 Main.panel.remove_style_class_name('transparent-top-bar--transparent-' + this._currentTransparency);
             }
+            
+            log("transparent is: "+transparency);
             Main.panel.add_style_class_name('transparent-top-bar--transparent-' + transparency);
             if (blurChanged) {
-                Main.panel.remove_style_class_name('transparent-top-bar--blur-' + this._currentBlur);
+                this._removeBlurredActors(Main.layoutManager.panelBox, PANEL_CONTAINER_NAME);
             }
-            Main.panel.add_style_class_name('transparent-top-bar--blur-' + blur);
+            this._createBlurredPanelActor(100, blur);
 
             this._currentTransparency = transparency;
             this._currentBlur = blur;
         } else {
+            log("clearing all effects");
             Main.panel.add_style_class_name('transparent-top-bar--solid');
             Main.panel.remove_style_class_name('transparent-top-bar--not-solid');
             Main.panel.remove_style_class_name('transparent-top-bar--transparent-' + this._currentTransparency);
-            Main.panel.remove_style_class_name('transparent-top-bar--blur-' + this._currentBlur);
+            this._removeBlurredActors(Main.layoutManager.panelBox, PANEL_CONTAINER_NAME);
         }
     }
 
+    //Blur logic taken from https://github.com/yozoon/gnome-shell-extension-blyr
+
+    _createBlurredPanelActor(brightness, blur) {
+        // Remove current blurred panel bgs
+        this._removeBlurredActors(Main.layoutManager.panelBox, PANEL_CONTAINER_NAME);
+
+        // Update backgrounds to prevent ghost actors
+        Main.overview._updateBackgrounds();
+
+        // Create list of backgrounds with full opacity
+        let bgs = [];
+        Main.overview._backgroundGroup.get_children().forEach(
+            (bg) => {
+                if (bg.opacity == 255 && bg.visible) {
+                    bgs.push(bg);
+                }
+            });
+
+        // Calculate index of primary background
+        // Check wheter the global display object has a get_primary_monitor method
+        if (global.display.get_primary_monitor == undefined) {
+            var bgIndex = bgs.length - global.screen.get_primary_monitor() - 1;
+        } else {
+            var bgIndex = bgs.length - global.display.get_primary_monitor() - 1;
+        }
+
+        // Select primary background
+        this.primaryBackground = bgs[bgIndex];
+
+        // Clutter Actor with height 0 which will contain the actual blurred background
+        this.panelContainer = new Clutter.Actor({
+            name: PANEL_CONTAINER_NAME,
+            width: 0,
+            height: 0,
+        });
+
+        let [tpx, tpy] = Main.layoutManager.panelBox.get_transformed_position();
+
+        // Clone primary background instance (we need to clone it, not just 
+        // assign it, so we can modify it without influencing the main 
+        // desktop background)
+        this.panel_bg = new Meta.BackgroundActor({
+            monitor: this.primaryBackground.monitor,
+            content: this.primaryBackground.content,
+            width: Main.layoutManager.panelBox.width,
+            height: Main.layoutManager.panelBox.width,
+            x: parseFloat(-1.0 * tpx),
+            y: parseFloat(-1.0 * tpy),
+        });
+        
+        this.panel_bg.content.vignette = false;
+        this.panel_bg.content.brightness = 1.0;
+        this.panel_bg.content.gradient = false;
+
+        // Only show one part of the panel background actor as large as the 
+        // panel itself
+        this.panel_bg.set_clip(
+            tpx,
+            tpy,
+            Main.layoutManager.panelBox.width,
+            Main.layoutManager.panelBox.height);
+
+        this.panel_bg.set_opacity(255);
+
+        let panel_brightness = 1.0;
+        let intensity = 30.0 * (blur / 100.0);
+        log("blur intensity is "+intensity)
+        // Apply the blur effect to the panel background
+        this._applyTwoPassBlur(this.panel_bg, intensity, panel_brightness);
+
+        // Add the background texture to the background container
+        this.panelContainer.add_actor(this.panel_bg);
+
+        // Add the background container to the system panel box
+        Main.layoutManager.panelBox.add_actor(this.panelContainer);
+        Main.layoutManager.panelBox.set_child_at_index(this.panelContainer, 0);
+    }
+
+    /***************************************************************
+     *            Blur Effect and Animation Utilities              *
+     ***************************************************************/
+    _applyTwoPassBlur(actor, intensity, brightness = 1.0) {
+        if (!actor.get_effect('blur')) {
+            actor.add_effect_with_name('blur', new Shell.BlurEffect({
+                mode: SHELL_BLUR_MODE_ACTOR,
+                brightness: parseFloat(brightness),
+                sigma: parseFloat(intensity),
+            }));
+        }
+    }
+
+    /***************************************************************
+     *                   Restore Shell State                       *
+     ***************************************************************/
+    _removeBlurredActors(parent, name) {
+        parent.get_children().forEach(
+            (child) => {
+                if (child.name == name) {
+                    parent.remove_child(child);
+                    child.destroy();
+                }
+            }
+        )
+    }
 };
 
 function init() {
