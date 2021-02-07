@@ -213,7 +213,7 @@ class Extension {
         });
 
         let [tpx, tpy] = Main.layoutManager.panelBox.get_transformed_position();
-
+        let panelHeight = Main.layoutManager.panelBox.height;
         // Clone primary background instance (we need to clone it, not just 
         // assign it, so we can modify it without influencing the main 
         // desktop background)
@@ -221,7 +221,7 @@ class Extension {
             monitor: this.primaryBackground.monitor,
             content: this.primaryBackground.content,
             width: Main.layoutManager.panelBox.width,
-            height: Main.layoutManager.panelBox.width,
+            height: panelHeight,
             x: parseFloat(-1.0 * tpx),
             y: parseFloat(-1.0 * tpy),
         });
@@ -236,7 +236,7 @@ class Extension {
             tpx,
             tpy,
             Main.layoutManager.panelBox.width,
-            Main.layoutManager.panelBox.height);
+            panelHeight);
 
         this.panel_bg.set_opacity(255);
 
