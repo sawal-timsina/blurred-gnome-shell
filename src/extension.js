@@ -44,6 +44,7 @@ class Extension {
         this._actorSignalIds = null;
         this._windowSignalIds = null;
         this._settings = getSettings();
+        this._settingsHandler = null;
         this._currentTransparency = this._settings.get_int('transparency');
         this._currentBlur = this._settings.get_int('blur');
         this.settingChangeDebounce = null;
@@ -54,7 +55,7 @@ class Extension {
         this._actorSignalIds = new Map();
         this._windowSignalIds = new Map();
 
-        this._settings.connect('changed', this._topBarVisualSettingsChanged.bind(this));
+        this._settingsHandler = this._settings.connect('changed', this._topBarVisualSettingsChanged.bind(this));
         this._actorSignalIds.set(Main.overview, [
             Main.overview.connect('showing', this._updateTopBarVisual.bind(this)),
             Main.overview.connect('hiding', this._updateTopBarVisual.bind(this))
@@ -103,6 +104,8 @@ class Extension {
         this._windowSignalIds = null;
 
         this._setTopBarVisual(false);
+
+        this._settings.disconnect(this._settingsHandler);
     }
 
     _onWindowActorAdded(container, metaWindowActor) {
