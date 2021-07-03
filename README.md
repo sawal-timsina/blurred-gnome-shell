@@ -18,7 +18,7 @@ Enusre you have `sassc` installed. If not, install it: `sudo apt-get install -y 
 ```
 make
 ```
-This will result in a zip file at `build/gnome-visuals-top-bar@evendanan.net.zip`
+This will result in a zip file at `build/blurred-gnome@codeIX9.com.zip`
 
 ### Copy built extension to gnome
 ```

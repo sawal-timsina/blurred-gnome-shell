@@ -1,10 +1,10 @@
 {
-  "description": "Fork of: https://github.com/lamarios/gnome-shell-extension-transparent-top-bar\n\nBring back the adjustable transparency top bar (panel) in GNOME Shell and add blur while at it.\n\nDoes not work well with custom shell themes.",
-  "name": "Top Bar Visuals - transparent and blur",
+  "description": "Add blur effect on top bar, dock, overview",
+  "name": "Blurred gnome",
   "shell-version": [
     "3.38"
   ],
-  "url": "https://github.com/menny/gnome-shell-extension-transparent-top-bar",
-  "uuid": "gnome-visuals-top-bar@evendanan.net",
+  "url": "https://github.com/sawal-timsina/blurred-gnome-shell",
+  "uuid": "blurred-gnome@codeIX9.com",
   "version": 1.0
 }

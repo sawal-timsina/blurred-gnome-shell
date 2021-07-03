@@ -8,7 +8,7 @@ const Shell = imports.gi.Shell;
 const Clutter = imports.gi.Clutter;
 
 const SHELL_BLUR_MODE_ACTOR = 0;
-const PANEL_CONTAINER_NAME = 'net.evendanan.gnome.topBarVisual_panel_container';
+const PANEL_CONTAINER_NAME = 'com.codeIX9.blurred-gnome_panel_container';
 
 /**
  * https://developer.mozilla.org/docs/Web/API/WindowOrWorkerGlobalScope/setTimeout
@@ -32,7 +32,7 @@ function getSettings() {
         false
     );
     let schemaObj = schemaSource.lookup(
-        'net.evendanan.gnome.topBarVisual', true);
+        'com.codeIX9.blurred-gnome', true);
     if (!schemaObj) {
         throw new Error('cannot find schemas');
     }
@@ -45,8 +45,9 @@ class Extension {
         this._windowSignalIds = null;
         this._settings = getSettings();
         this._settingsHandler = null;
-        this._currentTransparency = this._settings.get_int('transparency');
-        this._currentBlur = this._settings.get_int('blur');
+        this._darkTheme = this._settings.get_boolean('dark-theme');
+        this._currentTopBarTransparency = this._settings.get_int('top-bar-transparency');
+        this._currentTopBarBlur = this._settings.get_int('top-bar-blur');
         this.settingChangeDebounce = null;
     }
 
@@ -132,8 +133,13 @@ class Extension {
     }
 
     _setTopBarVisual(enabled) {
+        // dark theme
+        const darkTheme = this._settings.get_boolean("dark-theme");
+        const currentClassName = this._darkTheme ? 'transparent-top-bar--dark-' : 'transparent-top-bar--light-';
+        const newClassName = darkTheme ? 'transparent-top-bar--dark-' : 'transparent-top-bar--light-';
+
         if (enabled) {
-            //need to determine which transparency to use: full-window or regular
+            //need to determine which topBarTransparency to use: full-window or regular
 
             // Get all the windows in the active workspace that are in the primary monitor and visible.
             const workspaceManager = global.workspace_manager;
@@ -153,28 +159,33 @@ class Extension {
                 const verticalPosition = metaWindow.get_frame_rect().y;
                 return verticalPosition < panelBottom + 5 * scale;
             });
-            
-            const transparency = isNearEnough? this._settings.get_int("transparency-full") : this._settings.get_int("transparency");
-            const transparencyChanged = transparency !== this._currentTransparency;
+
+            // dark theme changed
+            const darkThemeChanged = darkTheme !== this._darkTheme;
+
+            const topBarTransparency = isNearEnough ? this._settings.get_int("top-bar-transparency-full") : this._settings.get_int("top-bar-transparency");
+            const topBarTransparencyChanged = topBarTransparency !== this._currentTopBarTransparency;
             Main.panel.remove_style_class_name('transparent-top-bar--solid');
             Main.panel.add_style_class_name('transparent-top-bar--not-solid');
-            if (transparencyChanged) {
-                Main.panel.remove_style_class_name('transparent-top-bar--transparent-' + this._currentTransparency);
+
+            if (topBarTransparencyChanged || darkThemeChanged) {
+                Main.panel.remove_style_class_name(currentClassName + this._currentTopBarTransparency);
             }
-            log("transparent is: "+transparency);
-            Main.panel.add_style_class_name('transparent-top-bar--transparent-' + transparency);
+            log("transparent is: " + topBarTransparency);
+            Main.panel.add_style_class_name(newClassName + topBarTransparency);
 
-            const blur = this._settings.get_int("blur");
+            const topBarBlur = this._settings.get_int("top-bar-blur");
             this._removeBlurredActors(Main.layoutManager.panelBox, PANEL_CONTAINER_NAME);
-            this._createBlurredPanelActor(100, blur);
+            this._createBlurredPanelActor(100, topBarBlur);
 
-            this._currentTransparency = transparency;
-            this._currentBlur = blur;
+            this._darkTheme = darkTheme;
+            this._currentTopBarTransparency = topBarTransparency;
+            this._currentTopBarBlur = topBarBlur;
         } else {
             log("clearing all effects");
             Main.panel.add_style_class_name('transparent-top-bar--solid');
             Main.panel.remove_style_class_name('transparent-top-bar--not-solid');
-            Main.panel.remove_style_class_name('transparent-top-bar--transparent-' + this._currentTransparency);
+            Main.panel.remove_style_class_name(currentClassName + this._currentTopBarTransparency);
             this._removeBlurredActors(Main.layoutManager.panelBox, PANEL_CONTAINER_NAME);
         }
     }
@@ -217,8 +228,8 @@ class Extension {
 
         let [tpx, tpy] = Main.layoutManager.panelBox.get_transformed_position();
         let panelHeight = Main.layoutManager.panelBox.height;
-        // Clone primary background instance (we need to clone it, not just 
-        // assign it, so we can modify it without influencing the main 
+        // Clone primary background instance (we need to clone it, not just
+        // assign it, so we can modify it without influencing the main
         // desktop background)
         this.panel_bg = new Meta.BackgroundActor({
             monitor: this.primaryBackground.monitor,
@@ -228,12 +239,12 @@ class Extension {
             x: parseFloat(-1.0 * tpx),
             y: parseFloat(-1.0 * tpy),
         });
-        
+
         this.panel_bg.content.vignette = false;
         this.panel_bg.content.brightness = 1.0;
         this.panel_bg.content.gradient = false;
 
-        // Only show one part of the panel background actor as large as the 
+        // Only show one part of the panel background actor as large as the
         // panel itself
         this.panel_bg.set_clip(
             tpx,

@@ -1,17 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schemalist>
-    <schema id="net.evendanan.gnome.topBarVisual" path="/net/evendanan/gnome/topBarVisual/">
-        <key type="i" name="transparency">
-            <default>30</default>
+    <schema id="com.codeIX9.blurred-gnome" path="/com/codeIX9/blurred-gnome/">
+        <key type="b" name="dark-theme">
+            <default>false</default>
+            <summary>Dark Theme</summary>
+            <description>Enable Dark Theme</description>
+        </key>
+        <key type="i" name="top-bar-transparency">
+            <default>20</default>
             <summary>Top bar transparency</summary>
             <description>Top bar transparency</description>
         </key>
-        <key type="i" name="transparency-full">
-            <default>70</default>
+        <key type="i" name="top-bar-transparency-full">
+            <default>40</default>
             <summary>Top bar transparency when full screen</summary>
             <description>Top bar transparency when at least one window is close to the top-bar</description>
         </key>
-        <key type="i" name="blur">
+        <key type="i" name="top-bar-blur">
             <default>30</default>
             <summary>Top bar blurring</summary>
             <description>Top bar blurring</description>

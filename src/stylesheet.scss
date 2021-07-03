@@ -8,12 +8,20 @@
 
 @for $i from 0 through 100 {
   $transparency: $i / 100;
-  #panel.transparent-top-bar--transparent-#{$i} {
+  #panel.transparent-top-bar--dark-#{$i} {
     background-color: rgba(0, 0, 0, $transparency);
   }
 
-  #panel.transparent-top-bar--transparent-#{$i} .panel-corner {
+  #panel.transparent-top-bar--dark-#{$i} .panel-corner {
     -panel-corner-background-color: rgba(0, 0, 0, $transparency);
   }
 
+
+  #panel.transparent-top-bar--light-#{$i} {
+    background-color: rgba(255, 255, 255, $transparency);
+  }
+
+  #panel.transparent-top-bar--light-#{$i} .panel-corner {
+    -panel-corner-background-color: rgba(255, 255, 255, $transparency);
+  }
 }
